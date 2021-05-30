@@ -117,7 +117,10 @@ def downloadRepo(sess,repoName):
 
 def AllinOne(sel, sess):
     undone=[]
-    requiredRepos=list(filter(sel, allRepos(sess)))
+    print("Working")
+    allrepo=allRepos(sess)
+    requiredRepos=list(filter(sel, allrepo))
+    print("Found %s Repos, %s of them are desired"%(allrepo.__len__(), requiredRepos.__len__()))
     for repoName in requiredRepos:
         done=downloadRepo(sess, repoName)
         if (not done) and (repoName!="management"):
@@ -125,7 +128,19 @@ def AllinOne(sel, sess):
     return undone
 giteaSess = createSess(params={"access_token": GITTOKEN})
 
-print("Those who hasn't released anything: %s" %AllinOne(giteaSess))
-print("Total Repo Number: %s" % allRepos(giteaSess).__len__())
+
+print("Fetch : 1) Individual Repos 2) P1 Repos 3) P2 Repos (Input Number):")
+choice = int(input())
+
+if choice==1:
+    filterFunc=individualRepo
+elif choice==2:
+    filterFunc=p1repos
+elif choice==3:
+    filterFunc=p2repo
+else:
+    print("ERROR")
+    exit
+print("Those who hasn't released anything: %s" %AllinOne(filterFunc,giteaSess))
 # download(giteaSess, "https://focs.ji.sjtu.edu.cn/git/attachments/90192a3d-52dd-4fe5-80fa-026fa8a3253b", "try/h.tar.txt")
 # r=giteaSess.get("https://focs.ji.sjtu.edu.cn/git/api/v1/repos/SilverFOCS-21/Git_Workshop_Demo/releases/52/assets")
