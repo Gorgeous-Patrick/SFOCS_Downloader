@@ -10,12 +10,28 @@ import shutil
 import subprocess
 
 def allRepos(sess):
-    r=sess.get("https://focs.ji.sjtu.edu.cn/git/api/v1/orgs/"+org+"/repos?limit=10000").json()
+    page=1
     res=[]
-    for repos in r:
-        res.append(repos["name"])
+    
+    while 1:
+        newres=[]
+        r=sess.get("https://focs.ji.sjtu.edu.cn/git/api/v1/orgs/"+org+"/repos?page="+str(page)+"&limit=10000").json()
+        for repos in r:
+            newres.append(repos["name"])
+        res=res+newres
+        if newres==[]:
+            break
+        page=page+1
+    
     return res
+def p1repos(name):
+    return name.startswith("p1")
 
+def p2repo(name):
+    return name.startswith("p2")
+
+def individualRepo(name):
+    return "520" in name
 def createSess(params):
     s = requests.Session()
     s.params.update(params)
@@ -99,9 +115,10 @@ def downloadRepo(sess,repoName):
         downloadRelease(sess, rel)
     return True
 
-def AllinOne(sess):
+def AllinOne(sel, sess):
     undone=[]
-    for repoName in allRepos(sess):
+    requiredRepos=list(filter(sel, allRepos(sess)))
+    for repoName in requiredRepos:
         done=downloadRepo(sess, repoName)
         if (not done) and (repoName!="management"):
             undone.append(repoName)
